@@ -4,6 +4,8 @@ import Web_Changed
 from git import Repo
 import sys
 import lizard
+import requests as req
+import json
 
 urls = (
 '/worker', 'worker'
@@ -24,9 +26,9 @@ class worker:
             fp.write(file_content)
         fp.close()
         # Calculate the cyclomatic complexity of the file
-        cyclomatic_complexity = lizard.analyze_file(worker_input.filename)
+        cyclomatic_complexity = lizard.analyze_file(worker_input.filename).average_cyclomatic_complexity
         os.remove(worker_input.filename)
-        return (cyclomatic_complexity.nloc)
+        #return (cyclomatic_complexity)
 
 
 
@@ -45,3 +47,11 @@ if __name__=="__main__":
 
     app = Web_Changed.MyWebApp(urls,globals())
     app.run(port=port)
+
+    # To register the worker in master
+    url = "http://localhost:8080/register/"
+    response = req.post(url)
+    print("Response: ",response.text)
+    # if the response is "Active", ask for the task
+    respose_ask_task = req.post("http://localhost:8080/master/")
+    if response.text == "Active":
