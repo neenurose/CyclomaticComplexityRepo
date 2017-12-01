@@ -2,6 +2,7 @@ import web
 import os
 import Web_Changed
 from git import Repo
+import shelve
 
 urls = (
 '/master/', 'master'
@@ -22,9 +23,10 @@ if __name__=="__main__":
     # get the list of commits
     commit_list = list(repo.iter_commits('master'))
     # get the files in each commit
+    commit_files = {}
     for each_commit in commit_list:
-        print(each_commit.stats.files)
-
+        commit_files[each_commit.hexsha]=(list(each_commit.stats.files.keys()))
+    print(commit_files)
 
     #app = Web_Changed.MyWebApp(urls,globals())
     #app.run(port=8081)
