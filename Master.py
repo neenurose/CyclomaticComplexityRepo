@@ -17,7 +17,7 @@ class master:
     def POST(self):
         # get the passed parameters host and port from the url
         worker_details = web.input(host='',port='')
-        if web.config.pointer < len(web.config.commit_files):
+        if web.config.pointer <= len(web.config.commit_files):
             web.config.lock.acquire()
             # get the git commit hex and filename from commit_files dictionary
             #print(web.config.pointer)
@@ -55,7 +55,7 @@ class done_work:
         web.config.lock.release()
         web.config.result_sum = web.config.result_sum + worker_result.result
         print("counter: ",web.config.counter)
-        if web.config.counter >= (web.config.pointer-1):
+        if web.config.counter == (web.config.pointer):
             complexity_avg = web.config.result_sum/web.config.counter
             print("Average", complexity_avg)
         return "Work done!"
@@ -64,11 +64,11 @@ class done_work:
 # count of no:of workers
 global worker_num
 worker_num = 0
-# iterator through global dictionary commit_files
+# iterator through global dictionary commit_files that is used to assign work to each worker
 pointer = 1
 # dictionary that stores id(integers) as key and (commt hex,filename) as value
 commit_files={}
-# count the number of distributed respose_ask_task
+# count the results recieved from each worker after completing their work
 counter = 0
 # for adding the cyclomatic complexity result from worker_result
 result_sum = 0

@@ -25,13 +25,14 @@ class worker(threading.Thread):
 
         #with tempfile.NamedTemporaryFile(suffix='.py',delete=True) as tmp:
         #    tmp.write(file_content.encode())
+        filename_tmp = worker_input.commithex + worker_input.filename
 
-        with open(worker_input.filename,'w+') as fp:
+        with open(filename_tmp,'w+') as fp:
             fp.write(file_content)
         fp.close()
         # Calculate the cyclomatic complexity of the file
-        cyclomatic_complexity = lizard.analyze_file(worker_input.filename).average_cyclomatic_complexity
-        os.remove(worker_input.filename)
+        cyclomatic_complexity = lizard.analyze_file(filename_tmp).average_cyclomatic_complexity
+        os.remove(filename_tmp)
         print("CC: ",cyclomatic_complexity)
         # Pass the result to master
         url = "http://localhost:8080/result?result="+str(cyclomatic_complexity)
