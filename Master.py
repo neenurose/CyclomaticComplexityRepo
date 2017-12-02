@@ -16,7 +16,7 @@ class master:
     def POST(self):
         # get the passed parameters host and port from the url
         worker_details = web.input(host='',port='')
-        if web.config.pointer <= len(web.config.commit_files):
+        if web.config.pointer < len(web.config.commit_files):
             # get the git commit hex and filename from commit_files dictionary
             #print(web.config.pointer)
             (commithex,filename) = web.config.commit_files[web.config.pointer]
@@ -27,6 +27,8 @@ class master:
             web.config.pointer = web.config.pointer+1
             response = req.get(url)
             return "Done"
+
+
         else:
             return "No task to assign!"
 
@@ -46,7 +48,8 @@ class done_work:
         worker_result.result = float(worker_result.result)
         web.config.counter = web.config.counter+1
         web.config.result_sum = web.config.result_sum + worker_result.result
-        if web.config.counter == web.config.pointer:
+        print(web.config.counter)
+        if web.config.counter > web.config.pointer:
             complexity_avg = web.config.result_sum/web.config.counter
             print("Average", complexity_avg)
         return "Work done!"
@@ -78,9 +81,10 @@ if __name__=="__main__":
         #commit_files[each_commit.hexsha]=(list(each_commit.stats.files.keys()))
         # Create a dictionary with id as key and (commit hex,filename) as value
         for filename in (list(each_commit.stats.files.keys())):
-            web.config.commit_files[i+1] = (each_commit.hexsha,filename)
-            i=i+1
-    #print(web.config.commit_files)
+            if os.path.splitext(filename)[1] not in [".txt",".csv",".pdf",".md",""]:
+                web.config.commit_files[i+1] = (each_commit.hexsha,filename)
+                i=i+1
+    print(len(web.config.commit_files))
 
 
     app.run(port=8080)
