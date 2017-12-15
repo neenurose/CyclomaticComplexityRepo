@@ -77,7 +77,7 @@ class done_work:
         web.config.lock.release()
         web.config.result_sum = web.config.result_sum + worker_result.result
         print("counter: ",web.config.counter)
-        if web.config.counter == len(web.config.commit_files)-2:
+        if web.config.counter == len(web.config.commit_files):
             # Calculate the time taken for the job
             time_taken = (time.time()-web.config.start_time)
             complexity_avg = web.config.result_sum/web.config.counter
