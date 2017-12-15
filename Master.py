@@ -4,12 +4,27 @@ import Web_Changed
 from git import Repo
 import requests as req
 import threading
+import psutil
+import time
 
 urls = (
 '/master', "master",
 '/register/', "register",
-'/result', "done_work"
+'/result', "done_work",
+'/graph_stats',"graph_stats"
 )
+
+class graph_stats:
+    # To get the stats for plotting the graph between No:of workers and the CPU Utilization,Memory utilization.
+    # A separate client is executed wile works are running to get the stats
+    def GET(self):
+        cpu_percent = psutil.cpu_percent()
+        print("CPU Utilization: ",cpu_percent)
+        vm = psutil.virtual_memory()
+        print("Virtual Memory: ",vm)
+        stats = "CPU Utilization:"+str(cpu_percent)+" Virtual Memory:"+str(vm)
+        return stats
+
 
 class master:
     def GET(self):
@@ -17,6 +32,10 @@ class master:
     def POST(self):
         # get the passed parameters host and port from the url
         worker_details = web.input(host='',port='')
+        # To note the start start time
+        if web.config.pointer == 1:
+            web.config.start_time = time.time()
+
         web.config.lock.acquire()
         if web.config.pointer <= len(web.config.commit_files):
             # get the git commit hex and filename from commit_files dictionary
@@ -59,8 +78,11 @@ class done_work:
         web.config.result_sum = web.config.result_sum + worker_result.result
         print("counter: ",web.config.counter)
         if web.config.counter == len(web.config.commit_files)-2:
+            # Calculate the time taken for the job
+            time_taken = (time.time()-web.config.start_time)
             complexity_avg = web.config.result_sum/web.config.counter
             print("Average", complexity_avg)
+            print("Time taken: ",time_taken)
         return "Work done!"
 
 
@@ -79,7 +101,7 @@ result_sum = 0
 if __name__=="__main__":
 
     app = Web_Changed.MyWebApp(urls,globals())
-    web.config.update({"worker_num":0,"pointer":1,"counter":0,"result_sum":0,"commit_files":{},"lock":threading.Lock()})
+    web.config.update({"worker_num":0,"pointer":1,"counter":0,"result_sum":0,"commit_files":{},"lock":threading.Lock(),"start_time":0})
     # get the local git repo
     repo = Repo("C:/Users/meenuneenu/Documents/GitHub/mlframework")
     # get the list of commits
